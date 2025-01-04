@@ -5,19 +5,20 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 
 # Sample dataset
-data = {
-    "text": [
-        "The market is booming with new opportunities.",
-        "Investors are worried about potential losses.",
-        "Stock prices are stable for now.",
-        "A major crash in the market is expected.",
-        "The economy is showing positive growth."
-    ],
-    "sentiment_score": [0.8, -0.7, 0.1, -0.9, 0.9]
-}
+# data = {
+#     "text": [
+#         "The market is booming with new opportunities.",
+#         "Investors are worried about potential losses.",
+#         "Stock prices are stable for now.",
+#         "A major crash in the market is expected.",
+#         "The economy is showing positive growth."
+#     ],
+#     "sentiment_score": [0.8, -0.7, 0.1, -0.9, 0.9]
+# }
 
 # Create a DataFrame
-df = pd.DataFrame(data)
+df = pd.read_csv('data/Sentiment_analysis_Data.csv')
+print(df.columns)
 
 # Text Preprocessing: Convert text to numerical features using TF-IDF
 vectorizer = TfidfVectorizer()
