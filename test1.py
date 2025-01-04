@@ -1,16 +1,24 @@
-import yfinance as yf
-from finvizfinance.quote import finvizfinance
+import yfinance as yf 
+from yahoo_fin import stock_info as si
+from yahoo_fin import news
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 import streamlit as st
 import plotly.express as px
-from datetime import datetime, timedelta
+from datetime import datetime
 from textblob import TextBlob
-from langchain_community.llms import Ollama
+
 from nsepython import *
-# Initialize Ollama with Gemma model
-llm = Ollama(model="hf.co/bartowski/gemma-2-9b-it-GGUF:IQ2_S")
+
+def get_all_tickers():
+    """
+    Fetches all stock tickers listed on NSE using nsepython.
+    """
+    tickers = nse_eq_symbols()
+    tickers= [s + ".NS" for s in tickers]
+    return tickers
+
 
 # Page configuration
 st.set_page_config(
@@ -18,6 +26,7 @@ st.set_page_config(
     page_icon="📈",
     layout="wide"
 )
+
 
 # Custom CSS for styling
 st.markdown("""
@@ -67,7 +76,7 @@ def summarize_news(news_list, sentiment):
 
     
     try:
-        summary = llm.invoke(prompt)
+        summary = news_text #llm.invoke(prompt)
         return summary.strip()
     except Exception as e:
         return f"Error generating summary: {str(e)}"
@@ -86,8 +95,25 @@ def get_stock_info(ticker):
     }
 
 def get_news_data(ticker):
-    stock = finvizfinance(ticker)
-    news_df = stock.ticker_news()
+    """
+    Collect the latest news articles for a specific stock ticker from Yahoo Finance.
+    :param ticker: Stock ticker symbol (e.g., "AAPL" for Apple)
+    :return: A DataFrame containing the news headlines, links, and timestamps.
+    """
+    # Fetch stock news for the ticker
+    stock_news = news.get_yf_rss(ticker)
+
+    # Extract relevant information into a DataFrame
+    news_list = []
+    for item in stock_news:
+        news_list.append({
+            "Title": item.get("title"),
+            "link": item.get("link"),
+            "Date": item.get("pubDate")
+        })
+
+    news_df = pd.DataFrame(news_list)
+    
     
     news_df['sentiment'] = news_df['Title'].apply(get_sentiment)
     news_df['sentiment_score'] = news_df['Title'].apply(lambda x: TextBlob(x).sentiment.polarity)
@@ -117,17 +143,12 @@ def create_sentiment_chart(news_df):
     )
     return fig
 
-def get_all_tickers():
-    """
-    Fetches all stock tickers listed on NSE using nsepython.
-    """
-    tickers = nse_eq_symbols()
-    tickers= [s + ".NS" for s in tickers]
-    return tickers
+
 
 def main():
     st.sidebar.image("https://img.icons8.com/color/48/000000/stocks.png", width=50)
     st.sidebar.title("Stock Analysis Dashboard")
+    # ticker = st.sidebar.text_input("Select Stock Ticker:", value='AAPL').upper()
     ticker = st.sidebar.selectbox("Select Stock Ticker:", options=get_all_tickers()).upper()
     
     if st.sidebar.button("Analyze"):
@@ -158,34 +179,37 @@ def main():
             st.subheader("News Summaries")
             
             col1, col2 = st.columns(2)
-            news = news_df['Title'].tolist()
 
             
             with col1:
                 # Positive News Summary
+                positive_news = news_df[news_df['sentiment'] == 'POSITIVE'][news_df['sentiment_score']>=0.1]['Title'].tolist()
                 st.markdown("""
                     <div class="summary-box positive-summary">
                         <h3>🟢 Positive News Summary</h3>
                     </div>
                 """, unsafe_allow_html=True)
-                st.write(summarize_news(news, 'POSITIVE'))
+                st.write(summarize_news(positive_news, 'POSITIVE'))
                 
                 # Negative News Summary
+
+                negative_news = news_df[news_df['sentiment'] == 'NEGATIVE'][news_df['sentiment_score']>=0.1]['Title'].tolist()
                 st.markdown("""
                     <div class="summary-box negative-summary">
                         <h3>🔴 Negative News Summary</h3>
                     </div>
                 """, unsafe_allow_html=True)
-                st.write(summarize_news(news, 'NEGATIVE'))
+                st.write(summarize_news(negative_news, 'NEGATIVE'))
             
             with col2:
                 # Neutral News Summary
+                neutral_news = news_df[news_df['sentiment'] == 'NEUTRAL'][news_df['sentiment_score']>=0.1]['Title'].tolist()
                 st.markdown("""
                     <div class="summary-box neutral-summary">
                         <h3>⚪ Neutral News Summary</h3>
                     </div>
                 """, unsafe_allow_html=True)
-                st.write(summarize_news(news, 'NEUTRAL'))
+                st.write(summarize_news(neutral_news, 'NEUTRAL'))
             
             # Detailed News Table
             st.subheader("Latest News")
@@ -209,9 +233,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-# curl -X POST  https://5e5c-2402-e280-3dfd-5a-5d4f-383b-290a-45ab.ngrok-free.app/api/generate -d '{"prompt": "Test prompt"}' -H "Content-Type: application/json"
-
-# Invoke-WebRequest -Uri "https://5e5c-2402-e280-3dfd-5a-5d4f-383b-290a-45ab.ngrok-free.app/api/generate" ` -Method POST ` -Body '{"prompt": "Test prompt"}' ` -ContentType "application/json"
