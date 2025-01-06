@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Analyzer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
+    </header>
+    <div id="el" data-value="">
+        <span id="needle"></span>
+    </div>
+    <div id="sug" data-value="No Suggested Move"></div>
+
+    <div class="frame">
+        <button class="custom-btn btn-12" onclick="showWelcome()"><span>Analyse</span><span>Click here</span></button>
+    </div>
+
+    <h1>Sentiment Analysis Experiment</h1>
+</body>
+<script>
+    function getRandomInteger(){
+        return Math.random()*2-1;
+    }
+
+
+    function showWelcome(){
+        const el= document.getElementById("needle");
+        const elDiv = document.getElementById("el");
+        const sug = document.getElementById("sug");
+
+        const randomValue = getRandomInteger();
+
+        let degree;
+        if(randomValue===0){
+            degree = 90;
+        }else if(randomValue <0){
+            degree = 90 - Math.abs(randomValue*90);
+        }else{
+            degree = 90 + Math.abs(randomValue*90);
+        }
+
+        el.style.transform = `rotate(${degree}deg)`;
+        elDiv.setAttribute('data-value', `${randomValue.toFixed(3)}`);
+
+        const mappedValue = (parseFloat(randomValue)+1)/2;
+
+        elDiv.style.setProperty('--value', mappedValue);
+        const suggestedMove = "Done";
+
+        sug.setAttribute('data-value', `${suggestedMove}`);
+    }
+</script>
+</html>
