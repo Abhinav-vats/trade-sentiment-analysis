@@ -1,11 +1,10 @@
 import yfinance as yf
 from finvizfinance.quote import finvizfinance
 import plotly.graph_objects as go
-import pandas as pd
-import numpy as np
 import streamlit as st
+import feedparser
 import plotly.express as px
-from datetime import datetime, timedelta
+from datetime import datetime
 from textblob import TextBlob
 from langchain_community.llms import Ollama
 from nsepython import *
@@ -47,9 +46,13 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-def get_sentiment(text):
+def get_sentiment_polarity(text):
     analysis = TextBlob(text)
     polarity = analysis.sentiment.polarity
+    return polarity
+
+def get_sentiment(text):
+    polarity = get_sentiment_polarity(text=text)
     if polarity > 0.1:
         return 'POSITIVE'
     elif polarity < -0.1:
@@ -124,6 +127,25 @@ def get_all_tickers():
     tickers = nse_eq_symbols()
     tickers= [s + ".NS" for s in tickers]
     return tickers
+
+def get_google_news(name, sector, industry):
+    prompt = f"""news of {name}, of {sector} sector and {industry} industry, that effect the stock price"""
+    prompt = prompt.replace(' ', '%20')
+    url = "https://news.google.com/rss/search?q="+prompt
+    news_list =[]
+    feed = feedparser.parse(url)
+    for item in feed.entries:
+        news_list.append(item.title)
+    
+    news_text = "\n".join([f"- {news}" for news in news_list])
+    return news_text
+
+
+def get_sentiment_through_news(ticker):
+    stock_info = get_stock_info(ticker=ticker)
+    text = get_google_news(name=stock_info['name'], sector=stock_info['sector'], industry=stock_info['industry'])
+    return get_sentiment_polarity(text=text)
+
 
 def main():
     st.sidebar.image("https://img.icons8.com/color/48/000000/stocks.png", width=50)
