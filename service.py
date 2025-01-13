@@ -48,4 +48,4 @@ def get_google_news(name, sector, industry):
 def get_sentiment_through_news(ticker):
     stock_info = get_stock_info(ticker=ticker)
     df = get_google_news(name=stock_info['name'], sector=stock_info['sector'], industry=stock_info['industry'])
-    return str(get_sentiment_polarity(df=df)[(df['polarity'] < -0.05) | (df['polarity'] > 0.05)]['polarity'].mean())
+    return str(get_sentiment_polarity(df=df)[(df['polarity'] < -0.1) | (df['polarity'] > 0.1)]['polarity'].mean())
