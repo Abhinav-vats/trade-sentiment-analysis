@@ -1,0 +1,4 @@
+curl --location 'https://apibs.business-standard.com/search/?type=all&limit=10&page=2&keyword=SBI%20BANK' \
+--header 'sec-fetch-mode: cors' \
+--header 'sec-fetch-site: same-site' \
+--header 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'

@@ -9,7 +9,7 @@ from textblob import TextBlob
 from langchain_community.llms import Ollama
 from nsepython import *
 # Initialize Ollama with Gemma model
-llm = Ollama(model="hf.co/bartowski/gemma-2-9b-it-GGUF:IQ2_S")
+llm = Ollama(model="llama3.2:1b")
 
 # Page configuration
 st.set_page_config(
@@ -74,6 +74,20 @@ def summarize_news(news_list, sentiment):
         return summary.strip()
     except Exception as e:
         return f"Error generating summary: {str(e)}"
+    
+def llama_based_sentiment_news(news_list):
+    if not news_list:
+        return "No news articles to summarize."
+    
+    news_text = "\n".join([f"- {news}" for news in news_list])
+    news_text+"\n"
+    prompt = f"""{news_text} Analyse all the points above and just provide the single sentiment score  value in between -1 and +1, where -1 being extremely negative and +1 being extremely positive. I want just the value and no extra text/word/letter/sentence or explanation."""
+    
+    try:
+        summary = llm.invoke(prompt)
+        return summary.strip()
+    except Exception as e:
+        return f"Error generating summary: {str(e)}"
 
 def get_stock_info(ticker):
     stock = yf.Ticker(ticker)
@@ -88,16 +102,17 @@ def get_stock_info(ticker):
         'volume': info.get('volume', 0)
     }
 
-def get_news_data(ticker):
-    stock = finvizfinance(ticker)
-    news_df = stock.ticker_news()
+def get_news_data(news):
+    #stock = finvizfinance(ticker)
+    news_df = pd.DataFrame()
+    news_df['Title'] = news
     
     news_df['sentiment'] = news_df['Title'].apply(get_sentiment)
     news_df['sentiment_score'] = news_df['Title'].apply(lambda x: TextBlob(x).sentiment.polarity)
-    news_df['Date'] = pd.to_datetime(news_df['Date'])
-    news_df['time_ago'] = news_df['Date'].apply(
-        lambda x: f"{(datetime.now() - x).days}d {(datetime.now() - x).seconds//3600}h ago"
-    )
+    # news_df['Date'] = pd.to_datetime(news_df['Date'])
+    # news_df['time_ago'] = news_df['Date'].apply(
+    #     lambda x: f"{(datetime.now() - x).days}d {(datetime.now() - x).seconds//3600}h ago"
+    # )
     
     return news_df
 
@@ -137,8 +152,8 @@ def get_google_news(name, sector, industry):
     for item in feed.entries:
         news_list.append(item.title)
     
-    news_text = "\n".join([f"- {news}" for news in news_list])
-    return news_text
+    # news_text = "\n".join([f"- {news}" for news in news_list])
+    return news_list
 
 
 def get_sentiment_through_news(ticker):
@@ -171,7 +186,8 @@ def main():
                 st.metric("Volume", f"{info['volume']:,}")
             
             # News Analysis
-            news_df = get_news_data(ticker)
+            news = get_google_news(info['name'], info['sector'], info['industry'])
+            news_df = get_news_data(news)
             
             # Sentiment Distribution
             st.plotly_chart(create_sentiment_chart(news_df), use_container_width=True)
@@ -211,20 +227,24 @@ def main():
             
             # Detailed News Table
             st.subheader("Latest News")
-            news_display = news_df[['Date', 'Title', 'sentiment', 'sentiment_score']].copy()
+            news_display = news_df[['Title', 'sentiment', 'sentiment_score']].copy()
             news_display['sentiment'] = news_display.apply(
                 lambda x: f"{'🟢' if x['sentiment'] == 'POSITIVE' else '🔴' if x['sentiment'] == 'NEGATIVE' else '⚪'} {x['sentiment']} ({x['sentiment_score']:.2f})",
                 axis=1
             )
             st.dataframe(
-                news_display[['Date', 'Title', 'sentiment']],
+                news_display[[ 'Title', 'sentiment']],
                 column_config={
-                    "Date": "Published",
                     "Title": "Headline",
                     "sentiment": "Sentiment (Score)"
                 },
                 hide_index=True
             )
+
+            news_text = "".join([f"{news_a}" for news_a in news])
+            # news_text+""
+
+            st.subheader("Final Sentiment score for the "+ticker+" is :"+ str(get_sentiment_polarity(news_text)))#llama_based_sentiment_news(news))
             
         except Exception as e:
             st.error(f"Error in analysis: {str(e)}")
