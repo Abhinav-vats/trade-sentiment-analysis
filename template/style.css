@@ -1,0 +1,221 @@
+@import url(https://fonts.googleapis.com/css?family=Lato:100,300,400,700);
+
+body {
+  background: rgb(35, 35, 29);
+}
+
+#el:before {
+  background: #fbfbfb;
+  border-radius: 200px 200px 0 0;
+  box-shadow: 3px 1px 8px rgba(0, 0, 0, 0.15) inset;
+  content: "";
+  height: 100px;
+  position: absolute;
+  width: 200px;
+  color: red;
+}
+
+#el {
+  border-radius: 200px 200px 0 0;
+  height: 100px;
+  margin: 50px auto 0;
+  overflow: hidden;
+  position: relative;
+  width: 200px;
+}
+
+#el:after {
+  background: rgb(35, 35, 29);;
+  border-radius: 140px 140px 0 0;
+  bottom: 0;
+  box-shadow: 3px 1px 8px rgba(0, 0, 0, 0.15);
+  transition: color 0.5s ease; /* Smooth transition for text color */
+  color: hsl(calc(var(--value) * 120), 100%, 50%);/*color: rgba(255, 80, 0, 0.7);*/
+  content: attr(data-value);
+  font-family: Lato, Helvetica Neue, Helvetica, Arial, sans-serif;
+  font-size: 1.5em;
+  font-weight: bold;
+  height: 70px;
+  left: 30px;
+  line-height: 95px;
+  position: absolute;
+  text-align: center;
+  width: 140px;
+  z-index: 3;
+}
+
+span {
+  transition: color 1.5s ease; /* Smooth transition for text color */
+  background-color: hsl(calc(var(--value) * 120), 100%, 50%);
+  /* background: rgba(255, 80, 0, 0.7); */
+  border-radius: 4px;
+  bottom: -4px;
+  box-shadow: 3px -1px 4px rgba(0, 0, 0, 0.4);
+  display: block;
+  height: 8px;
+  left: 10px;
+  position: absolute;
+  width: 90px;
+  transform-origin: 100% 4px;
+  transform: rotate(90deg);
+  transition: all 2s;
+}
+
+#el:hover span {
+  transform: rotate(180deg);
+}
+
+h1,
+p,
+#sug {
+  display: block;
+  font-family: Lato;
+  text-align: center;
+  color: white;
+}
+
+h1 {
+  margin-bottom: 0.4em;
+}
+
+p {
+  margin-top: 0;
+}
+
+#sug {
+  transition: color 0.5s ease; /* Smooth transition for text color */
+  background-color: hsl(calc(var(--value) * 120), 100%, 50%);
+  content: attr(data-val);
+  font-size: 2.5em;
+}
+
+
+
+.frame {
+    width: 90%;
+    margin: 40px auto;
+    text-align: center;
+}
+
+button {
+    margin: 20px;
+}
+.custom-btn {
+    width: 200px;
+    height: 40px;
+    color: #fff;
+    border-radius: 5px;
+    padding: 10px 25px;
+    font-family: 'Lato', sans-serif;
+    font-weight: 500;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    display: inline-block;
+    box-shadow: inset 2px 2px 2px 0px rgba(255, 255, 255, .5),
+        7px 7px 20px 0px rgba(0, 0, 0, .1),
+        4px 4px 5px 0px rgba(0, 0, 0, .1);
+    outline: none;
+}
+
+
+/* 12 */
+.btn-12 {
+    position: relative;
+    right: 20px;
+    bottom: 20px;
+    border: none;
+    box-shadow: none;
+    width: 200px;
+    height: 40px;
+    line-height: 42px;
+    -webkit-perspective: 230px;
+    perspective: 230px;
+}
+
+.btn-12 span {
+    background: rgb(0, 172, 238);
+    background: linear-gradient(0deg, rgba(0, 172, 238, 1) 0%, rgba(2, 126, 251, 1) 100%);
+    display: block;
+    position: absolute;
+    width: 200px;
+    height: 40px;
+    box-shadow: inset 2px 2px 2px 0px rgba(255, 255, 255, .5),
+        7px 7px 20px 0px rgba(0, 0, 0, .1),
+        4px 4px 5px 0px rgba(0, 0, 0, .1);
+    border-radius: 5px;
+    margin: 0;
+    margin-left: 10px;
+    text-align: center;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    -webkit-transition: all .3s;
+    transition: all .3s;
+}
+
+.btn-12 span:nth-child(1) {
+    box-shadow:
+        -7px -7px 20px 0px #fff9,
+        -4px -4px 5px 0px #fff9,
+        7px 7px 20px 0px #0002,
+        4px 4px 5px 0px #0001;
+    -webkit-transform: rotateX(90deg);
+    -moz-transform: rotateX(90deg);
+    transform: rotateX(90deg);
+    -webkit-transform-origin: 50% 50% -20px;
+    -moz-transform-origin: 50% 50% -20px;
+    transform-origin: 50% 50% -20px;
+}
+
+.btn-12 span:nth-child(2) {
+    -webkit-transform: rotateX(0deg);
+    -moz-transform: rotateX(0deg);
+    transform: rotateX(0deg);
+    -webkit-transform-origin: 50% 50% -20px;
+    -moz-transform-origin: 50% 50% -20px;
+    transform-origin: 50% 50% -20px;
+}
+
+.btn-12:hover span:nth-child(1) {
+    box-shadow: inset 2px 2px 2px 0px rgba(255, 255, 255, .5),
+        7px 7px 20px 0px rgba(0, 0, 0, .1),
+        4px 4px 5px 0px rgba(0, 0, 0, .1);
+    -webkit-transform: rotateX(0deg);
+    -moz-transform: rotateX(0deg);
+    transform: rotateX(0deg);
+}
+
+.btn-12:hover span:nth-child(2) {
+    box-shadow: inset 2px 2px 2px 0px rgba(255, 255, 255, .5),
+        7px 7px 20px 0px rgba(0, 0, 0, .1),
+        4px 4px 5px 0px rgba(0, 0, 0, .1);
+    color: transparent;
+    -webkit-transform: rotateX(-90deg);
+    -moz-transform: rotateX(-90deg);
+    transform: rotateX(-90deg);
+}
+
+
+
+select {
+  width: 200px;               /* Width of the dropdown */
+  padding: 10px;              /* Padding inside the box */
+  font-size: 16px;            /* Font size for options */
+  border: 1px solid #ccc;     /* Border styling */
+  border-radius: 5px;         /* Rounded corners */
+  background-color: #000000;  /* Background color */
+  color: #ffffff;                /* Text color */
+  cursor: pointer;            /* Pointer on hover */
+}
+
+/* Change the background on hover */
+select:hover {
+  background-color: #000000;  /* Slightly darker background on hover */
+}
+
+/* Optional: Adjust the arrow (for some browsers) */
+select:focus {
+  outline: none; /* Remove outline when focused */
+}

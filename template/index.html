@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <header>
+    <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
+  </header>
+  <div id="el" data-value="">
+    <span id="needle"></span>
+  </div>
+  <div id="sug" data-value='No Suggested Move'></div>
+
+  <div class="frame">
+    <!-- <button id="rotateBtn" onclick="showWelcome()">Generate Random Rotation</button> -->
+
+    <select id="ticker-select">
+      <option value="">--Select any option--</option>
+    </select><br><br>
+    <button class="custom-btn btn-12" onclick="showWelcome()"><span>Analyse</span><span>Click Here</span></button>
+  </div>
+
+
+  <h1>Sentiment Analysis Experiment</h1>
+  <p>Have fun with this little sentiment analysis experiment.</p>
+</body>
+<script>
+  
+  async function populateDropdown() {
+    const selectElement = document.getElementById('ticker-select');
+
+
+    try {
+      const response = await fetch("http://localhost:5000/ticker")
+      
+      const data = await response.json();
+      //getRandomNames();//await response.json();
+
+      // Assuming the API returns an array of objects like [{ code: "en", name: "English" }, ...]
+      data.forEach(language => {
+        const option = document.createElement('option');
+        option.value = language; // Set value from API data
+        option.textContent = language; // Set display text from API data
+        option.className = 'btn-drp';
+        selectElement.appendChild(option);
+      });
+    } catch (error) {
+      console.error('Error fetching languages:', error);
+    }
+  }
+
+  // Call the function when the page loads
+  document.addEventListener('DOMContentLoaded', populateDropdown);
+
+  const links = document.querySelectorAll(".links a");
+  links.forEach((link) => {
+    link.addEventListener("click", function () {
+      // Remove selected class from all links
+      links.forEach((l) => l.classList.remove("selected"));
+
+      // Add selected class to the clicked link
+      this.classList.add("selected");
+    });
+  });
+
+  async function getStockSentimentPolarity(val) {
+
+    if (val == "") {
+      return 0;
+    }
+
+    const response = await fetch("http://localhost:5000/sentiment?ticker="+val);
+    const fltVal = Number(await response.json());
+
+    //return fltVal;
+    return Math.random() * 2 - 1;
+  }
+  async function  showWelcome() {
+    const el = document.getElementById("needle");
+    const ticker = document.getElementById("ticker-select");
+    const elDiv = document.getElementById("el");
+    // const button = document.getElementById("rotateBtn");
+    const sug = document.getElementById("sug")
+
+    // Generate a random number between -1 and 1
+    const randomValue = await getStockSentimentPolarity(ticker.value);
+    
+    let degree;
+    if (randomValue === 0) {
+      degree = 90;
+    } else if (randomValue < 0) {
+      // If less than 0, map to a value less than 90 (e.g., 0 to 89)
+      degree = 90 - Math.abs(randomValue * 90);
+    } else {
+      // If greater than 0, map to a value greater than 90 (e.g., 91 to 180)
+      degree = 90 + randomValue * 90;
+    }
+
+    // Apply rotation to the element
+    el.style.transform = `rotate(${degree}deg)`;
+    elDiv.setAttribute('data-value', `${randomValue.toFixed(3)}`)
+
+    const mappedValue = (parseFloat(randomValue) + 1) / 2;
+
+    // Update the CSS variable
+    elDiv.style.setProperty('--value', mappedValue);
+
+    // strg.style.setProperty('--value', mappedValue);
+
+    const suggestedMove = "Done";
+
+    sug.setAttribute("data-value", `${suggestedMove}`);
+
+  }
+
+</script>
+
+</html>
