@@ -25,8 +25,8 @@ def return_all_tickers():
 @app.route('/sentiment') 
 @cross_origin()
 def query_example(): 
-    ticker = request.args.get('ticker') 
-    return service.get_sentiment_through_news(ticker=ticker)
+    ticker = request.args.get('ticker')
+    return service.get_sentiment_through_business_news(ticker=ticker)
 
 # main driver function
 if __name__ == '__main__':

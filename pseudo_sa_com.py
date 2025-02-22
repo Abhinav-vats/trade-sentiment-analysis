@@ -7,7 +7,7 @@ from transformers import pipeline
 import numpy as np
 import requests
 import time
-
+from datetime import datetime
 
 import logging
 
@@ -34,7 +34,6 @@ models = [
     # "mrm8488/distilroberta-finetuned-financial-news-sentiment-analysis", #------
     # "ProsusAI/finbert",
     # "LHF/finbert-regressor", #---- without tensor
-    # "mr8488/distilroberta-finetuned-financial-news-sentiment-analysis", #------
 ]
 
 def calculate_SA_Polarity(text,model_name = "cardiffnlp/twitter-roberta-base-sentiment-latest"):
@@ -61,7 +60,7 @@ def calculate_SA_Polarity(text,model_name = "cardiffnlp/twitter-roberta-base-sen
     # calculate_SA_Polarity(text=text)
 
 
-ticker = "SBI BANK"
+ticker = "HDFC BANK"
 def fetch_business_news(ticker=ticker, size=10, page=1):
     url = f"https://apibs.business-standard.com/search/?type=all&limit={size}&page={page}&keyword={ticker}"
 
@@ -78,33 +77,54 @@ def fetch_business_news(ticker=ticker, size=10, page=1):
     res_dict = json.loads(response.text)
 
     output_lst = []
+    timestamps = []
+
     for news in res_dict['data']['news']:
-        output = {'headline': news['sub_heading'], 'timestamp': news['published_date']}
-        output_lst.append(output)
+        if news['sub_heading'] != "":
+            output = {'headline': news['sub_heading'], 'timestamp': news['published_date']}
+            output_lst.append(output)
+            timestamps.append(news['published_date'])
 
-    return output_lst
+    return output_lst, timestamps
 
 
-headlines_timestamp_dict_list = fetch_business_news()
-timestamps = []
+headlines_timestamp_dict_list, timestamps = fetch_business_news()
 
-for headline in headlines_timestamp_dict_list:
-    timestamps.append(headline['timestamp'])
 
 def calculate_recency_weight(timestamps):
     latest_time = max(timestamps)
     recency_weights = np.exp(-(latest_time - np.array(timestamps))/ (24*60*60*10))
     time_resp ={}
+    sum =0
     sum_np= np.sum(recency_weights)
     for i in range(len(timestamps)):
-        time_resp[timestamps[i]] = recency_weights[i]/sum_np
 
-    return time_resp
-    # return recency_weights/np.sum(recency_weights)
+        val = recency_weights[i]/sum_np
+        time_resp[timestamps[i]] = val
+        sum +=val
 
-now = int(time.time())
-timestamps.append(now)
+    return time_resp, sum
+
 timestamps.sort()
 timestamps.reverse()
 
-print(calculate_recency_weight(timestamps=timestamps))
+
+
+recency_dict, weight_sum = calculate_recency_weight(timestamps=timestamps)
+response_final = []
+sentiment_score_lst = []
+sentiment_score_sum = 0
+for headline in headlines_timestamp_dict_list:
+    sentiment_score = calculate_SA_Polarity(headline['headline'])
+    sa_score = round(float(sentiment_score)*recency_dict[headline['timestamp']],4)
+    # headline['sentiment_score_weight'] = sa_score
+    # headline['sentiment_score'] = round(float(sentiment_score), 2)
+    # headline['weight'] = recency_dict[headline['timestamp']]
+    # headline['publish_time'] = datetime.fromtimestamp(headline['timestamp']).strftime('%Y-%m-%d %H:%M:%S')
+
+    # response_final.append(headline)
+    # sentiment_score_lst.append(sa_score)
+    sentiment_score_sum += sa_score
+
+
+print(round(float(sentiment_score_sum), 3))

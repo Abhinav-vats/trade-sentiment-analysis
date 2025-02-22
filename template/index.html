@@ -77,8 +77,8 @@
     const response = await fetch("http://localhost:5000/sentiment?ticker="+val);
     const fltVal = Number(await response.json());
 
-    //return fltVal;
-    return Math.random() * 2 - 1;
+    return fltVal;
+    // return Math.random() * 2 - 1;
   }
   async function  showWelcome() {
     const el = document.getElementById("needle");
