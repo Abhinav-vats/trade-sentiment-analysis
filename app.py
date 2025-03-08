@@ -1,6 +1,7 @@
-from flask import Flask, request
+from flask import Flask, request, render_template
 from flask_cors import CORS, cross_origin
 import service
+
 
 # Flask constructor takes the name of 
 # current module (__name__) as argument.
@@ -13,9 +14,11 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 # which tells the application which URL should call 
 # the associated function.
 @app.route('/')
-# ‘/’ URL is bound with hello_world() function.
-def hello_world():
-    return 'Hello World'
+def index():
+
+    user_name = "John Doe"  # Example data to pass to the template
+
+    return render_template("index.html", name=user_name) 
 
 @app.route('/ticker')
 @cross_origin()
